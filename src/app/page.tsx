@@ -19,10 +19,10 @@ const lerp = (start: any, end: any, t: any) => {
 };
 
 const Simulation = () => {
-	// const { data, error, isLoading } = useSWR(
-	// 	"http://127.0.0.1:8000/lane-points",
-	// 	getData
-	// );
+	const { data, error, isLoading } = useSWR(
+		"http://127.0.0.1:8000/lane-points",
+		getData
+	);
 
 	const animationEnabled = false;
 
@@ -33,7 +33,7 @@ const Simulation = () => {
 	const [lat, setLat] = useState(-83.698301);
 	const [zoom, setZoom] = useState(17);
 
-	const [activePointIndex, setActivePointIndex] = useState(0);
+	// const [activePointIndex, setActivePointIndex] = useState(0);
 
 	// const animateCircle = () => {
 	// 	if (!map.current || !map_coordinates) return;
@@ -73,25 +73,25 @@ const Simulation = () => {
 	// 	});
 	// };
 
-	// const map_coordinates = data
-	// 	? Object.entries(data)
-	// 			.filter(([key, value]: any) => {
-	// 				return value.point_id == 2;
-	// 			})
-	// 			.map(([key, value]: any) => ({
-	// 				type: "Feature",
-	// 				geometry: {
-	// 					type: "Point",
-	// 					coordinates: [
-	// 						parseFloat(value.latitude),
-	// 						parseFloat(value.longitude),
-	// 					],
-	// 				},
-	// 				properties: {
-	// 					id: key,
-	// 				},
-	// 			}))
-	// 	: null;
+	const map_coordinates = data
+		? Object.entries(data)
+				// .filter(([key, value]: any) => {
+				// 	return value.point_id == 2;
+				// })
+				.map(([key, value]: any) => ({
+					type: "Feature",
+					geometry: {
+						type: "Point",
+						coordinates: [
+							parseFloat(value.latitude),
+							parseFloat(value.longitude),
+						],
+					},
+					properties: {
+						id: key,
+					},
+				}))
+		: null;
 
 	useEffect(() => {
 		if (map.current || !mapContainer.current) return;
@@ -104,71 +104,71 @@ const Simulation = () => {
 		});
 	}, []);
 
-	// 	useEffect(() => {
-	// 		if (!map.current || !mapContainer.current || !data) return;
+	useEffect(() => {
+		if (!map.current || !mapContainer.current || !data) return;
 
-	// 		map.current.on("load", () => {
-	// 			// Remove the existing 'points' source and layer if they exist
-	// 			if (map.current.getLayer("points")) {
-	// 				map.current.removeLayer("points");
-	// 			}
-	// 			if (map.current.getSource("points")) {
-	// 				map.current.removeSource("points");
-	// 			}
+		map.current.on("load", () => {
+			// Remove the existing 'points' source and layer if they exist
+			if (map.current.getLayer("points")) {
+				map.current.removeLayer("points");
+			}
+			if (map.current.getSource("points")) {
+				map.current.removeSource("points");
+			}
 
-	// 			map.current.on("click", (e: any) => {
-	// 				console.log(`Latitude: ${e.lngLat.lat}, Longitude: ${e.lngLat.lng}`);
-	// 			});
+			map.current.on("click", (e: any) => {
+				console.log(`Latitude: ${e.lngLat.lat}, Longitude: ${e.lngLat.lng}`);
+			});
 
-	// 			// Add a new source and layer for the points
-	// 			map.current.addSource("points", {
-	// 				type: "geojson",
-	// 				data: {
-	// 					type: "FeatureCollection",
-	// 					features: map_coordinates,
-	// 				},
-	// 			});
+			// Add a new source and layer for the points
+			map.current.addSource("points", {
+				type: "geojson",
+				data: {
+					type: "FeatureCollection",
+					features: map_coordinates,
+				},
+			});
 
-	// 			map.current.addLayer({
-	// 				id: "points",
-	// 				type: "circle",
-	// 				source: "points",
-	// 				paint: {
-	// 					"circle-radius": 3, // You can adjust the circle size here
-	// 					"circle-color": "#B42222",
-	// 				},
-	// 			});
+			map.current.addLayer({
+				id: "points",
+				type: "circle",
+				source: "points",
+				paint: {
+					"circle-radius": 3, // You can adjust the circle size here
+					"circle-color": "#B42222",
+				},
+			});
 
-	// 			// if (animationEnabled) {
-	// 			// 	map.current.addSource("animatedPoint", {
-	// 			// 		type: "geojson",
-	// 			// 		data: {
-	// 			// 			type: "Point",
-	// 			// 			coordinates: [0, 0], // Initial coordinates
-	// 			// 		},
-	// 			// 	});
+			// if (animationEnabled) {
+			// 	map.current.addSource("animatedPoint", {
+			// 		type: "geojson",
+			// 		data: {
+			// 			type: "Point",
+			// 			coordinates: [0, 0], // Initial coordinates
+			// 		},
+			// 	});
 
-	// 			// 	map.current.addLayer({
-	// 			// 		id: "animatedPoint",
-	// 			// 		type: "circle",
-	// 			// 		source: "animatedPoint",
-	// 			// 		paint: {
-	// 			// 			"circle-radius": 10, // Larger circle size
-	// 			// 			"circle-color": "blue", // Blue color
-	// 			// 		},
-	// 			// 	});
+			// 	map.current.addLayer({
+			// 		id: "animatedPoint",
+			// 		type: "circle",
+			// 		source: "animatedPoint",
+			// 		paint: {
+			// 			"circle-radius": 10, // Larger circle size
+			// 			"circle-color": "blue", // Blue color
+			// 		},
+			// 	});
 
-	// 			// 	// animateCircle();
-	// 			// }
-	// 		});
+			// 	// animateCircle();
+			// }
+		});
 
-	// 	// If the map is already loaded, call the 'load' event handler manually
-	// 	if (map.current.loaded()) {
-	// 		map.current.fire("load");
-	// 	}
+		// If the map is already loaded, call the 'load' event handler manually
+		if (map.current.loaded()) {
+			map.current.fire("load");
+		}
 
-	// 	console.log(data);
-	// }, [data]);
+		console.log(data);
+	}, [data]);
 
 	return (
 		<main className="w-screen h-screen">
