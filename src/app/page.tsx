@@ -1,113 +1,180 @@
-import Image from 'next/image'
+"use client";
+import mapboxgl from "mapbox-gl";
+import "mapbox-gl/dist/mapbox-gl.css";
+import { useEffect, useRef, useState } from "react";
+import useSWR from "swr";
 
-export default function Home() {
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
+mapboxgl.accessToken =
+	process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN != null
+		? process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN
+		: "UNDEFINED";
 
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
+const getData = async (key: string) => {
+	const res = await fetch(key);
+	return res.json();
+};
 
-      <div className="mb-32 grid text-center lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
+const lerp = (start: any, end: any, t: any) => {
+	return start * (1 - t) + end * t;
+};
 
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800 hover:dark:bg-opacity-30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
+const Simulation = () => {
+	// const { data, error, isLoading } = useSWR(
+	// 	"http://127.0.0.1:8000/lane-points",
+	// 	getData
+	// );
 
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore the Next.js 13 playground.
-          </p>
-        </a>
+	const animationEnabled = false;
 
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  )
-}
+	const mapContainer = useRef(null);
+	const map: any = useRef(null);
+
+	const [lng, setLng] = useState(42.300546);
+	const [lat, setLat] = useState(-83.698301);
+	const [zoom, setZoom] = useState(17);
+
+	const [activePointIndex, setActivePointIndex] = useState(0);
+
+	// const animateCircle = () => {
+	// 	if (!map.current || !map_coordinates) return;
+
+	// 	setActivePointIndex((prevIndex): any => {
+	// 		const nextIndex = (prevIndex + 1) % map_coordinates.length;
+	// 		const startCoordinates = map_coordinates[prevIndex].geometry.coordinates;
+	// 		const endCoordinates = map_coordinates[nextIndex].geometry.coordinates;
+
+	// 		const startTime = performance.now();
+
+	// 		const duration = 100; // Time in milliseconds for the transition between points
+
+	// 		const updatePosition = (timestamp: any) => {
+	// 			const elapsedTime = timestamp - startTime;
+	// 			const t = Math.min(elapsedTime / duration, 1);
+
+	// 			const interpolatedLng = lerp(startCoordinates[0], endCoordinates[0], t);
+	// 			const interpolatedLat = lerp(startCoordinates[1], endCoordinates[1], t);
+
+	// 			map.current.getSource("animatedPoint").setData({
+	// 				type: "Point",
+	// 				coordinates: [interpolatedLng, interpolatedLat],
+	// 			});
+
+	// 			if (t < 1) {
+	// 				requestAnimationFrame(updatePosition);
+	// 			} else {
+	// 				setActivePointIndex(nextIndex);
+	// 				setTimeout(() => {
+	// 					requestAnimationFrame(animateCircle);
+	// 				}, 10);
+	// 			}
+	// 		};
+
+	// 		requestAnimationFrame(updatePosition);
+	// 	});
+	// };
+
+	// const map_coordinates = data
+	// 	? Object.entries(data)
+	// 			.filter(([key, value]: any) => {
+	// 				return value.point_id == 2;
+	// 			})
+	// 			.map(([key, value]: any) => ({
+	// 				type: "Feature",
+	// 				geometry: {
+	// 					type: "Point",
+	// 					coordinates: [
+	// 						parseFloat(value.latitude),
+	// 						parseFloat(value.longitude),
+	// 					],
+	// 				},
+	// 				properties: {
+	// 					id: key,
+	// 				},
+	// 			}))
+	// 	: null;
+
+	useEffect(() => {
+		if (map.current || !mapContainer.current) return;
+
+		map.current = new mapboxgl.Map({
+			container: mapContainer.current,
+			style: "mapbox://styles/mapbox/satellite-v9",
+			center: [lat, lng],
+			zoom: zoom,
+		});
+	}, []);
+
+	// 	useEffect(() => {
+	// 		if (!map.current || !mapContainer.current || !data) return;
+
+	// 		map.current.on("load", () => {
+	// 			// Remove the existing 'points' source and layer if they exist
+	// 			if (map.current.getLayer("points")) {
+	// 				map.current.removeLayer("points");
+	// 			}
+	// 			if (map.current.getSource("points")) {
+	// 				map.current.removeSource("points");
+	// 			}
+
+	// 			map.current.on("click", (e: any) => {
+	// 				console.log(`Latitude: ${e.lngLat.lat}, Longitude: ${e.lngLat.lng}`);
+	// 			});
+
+	// 			// Add a new source and layer for the points
+	// 			map.current.addSource("points", {
+	// 				type: "geojson",
+	// 				data: {
+	// 					type: "FeatureCollection",
+	// 					features: map_coordinates,
+	// 				},
+	// 			});
+
+	// 			map.current.addLayer({
+	// 				id: "points",
+	// 				type: "circle",
+	// 				source: "points",
+	// 				paint: {
+	// 					"circle-radius": 3, // You can adjust the circle size here
+	// 					"circle-color": "#B42222",
+	// 				},
+	// 			});
+
+	// 			// if (animationEnabled) {
+	// 			// 	map.current.addSource("animatedPoint", {
+	// 			// 		type: "geojson",
+	// 			// 		data: {
+	// 			// 			type: "Point",
+	// 			// 			coordinates: [0, 0], // Initial coordinates
+	// 			// 		},
+	// 			// 	});
+
+	// 			// 	map.current.addLayer({
+	// 			// 		id: "animatedPoint",
+	// 			// 		type: "circle",
+	// 			// 		source: "animatedPoint",
+	// 			// 		paint: {
+	// 			// 			"circle-radius": 10, // Larger circle size
+	// 			// 			"circle-color": "blue", // Blue color
+	// 			// 		},
+	// 			// 	});
+
+	// 			// 	// animateCircle();
+	// 			// }
+	// 		});
+
+	// 	// If the map is already loaded, call the 'load' event handler manually
+	// 	if (map.current.loaded()) {
+	// 		map.current.fire("load");
+	// 	}
+
+	// 	console.log(data);
+	// }, [data]);
+
+	return (
+		<main className="w-screen h-screen">
+			<div ref={mapContainer} className="w-full h-full mapboxgl-canvas" />
+		</main>
+	);
+};
+
+export default Simulation;
