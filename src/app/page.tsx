@@ -20,11 +20,9 @@ const lerp = (start: any, end: any, t: any) => {
 
 const Simulation = () => {
 	const { data, error, isLoading } = useSWR(
-		"http://127.0.0.1:8000/lane-points",
+		"http://127.0.0.1:8000/crossings",
 		getData
 	);
-
-	const animationEnabled = false;
 
 	const mapContainer = useRef(null);
 	const map: any = useRef(null);
@@ -32,46 +30,6 @@ const Simulation = () => {
 	const [lng, setLng] = useState(42.300546);
 	const [lat, setLat] = useState(-83.698301);
 	const [zoom, setZoom] = useState(17);
-
-	// const [activePointIndex, setActivePointIndex] = useState(0);
-
-	// const animateCircle = () => {
-	// 	if (!map.current || !map_coordinates) return;
-
-	// 	setActivePointIndex((prevIndex): any => {
-	// 		const nextIndex = (prevIndex + 1) % map_coordinates.length;
-	// 		const startCoordinates = map_coordinates[prevIndex].geometry.coordinates;
-	// 		const endCoordinates = map_coordinates[nextIndex].geometry.coordinates;
-
-	// 		const startTime = performance.now();
-
-	// 		const duration = 100; // Time in milliseconds for the transition between points
-
-	// 		const updatePosition = (timestamp: any) => {
-	// 			const elapsedTime = timestamp - startTime;
-	// 			const t = Math.min(elapsedTime / duration, 1);
-
-	// 			const interpolatedLng = lerp(startCoordinates[0], endCoordinates[0], t);
-	// 			const interpolatedLat = lerp(startCoordinates[1], endCoordinates[1], t);
-
-	// 			map.current.getSource("animatedPoint").setData({
-	// 				type: "Point",
-	// 				coordinates: [interpolatedLng, interpolatedLat],
-	// 			});
-
-	// 			if (t < 1) {
-	// 				requestAnimationFrame(updatePosition);
-	// 			} else {
-	// 				setActivePointIndex(nextIndex);
-	// 				setTimeout(() => {
-	// 					requestAnimationFrame(animateCircle);
-	// 				}, 10);
-	// 			}
-	// 		};
-
-	// 		requestAnimationFrame(updatePosition);
-	// 	});
-	// };
 
 	const map_coordinates = data
 		? Object.entries(data)
@@ -135,39 +93,16 @@ const Simulation = () => {
 				source: "points",
 				paint: {
 					"circle-radius": 3, // You can adjust the circle size here
-					"circle-color": "#B42222",
+					"circle-color": "#FFFFFF",
+					// #B42222
 				},
 			});
-
-			// if (animationEnabled) {
-			// 	map.current.addSource("animatedPoint", {
-			// 		type: "geojson",
-			// 		data: {
-			// 			type: "Point",
-			// 			coordinates: [0, 0], // Initial coordinates
-			// 		},
-			// 	});
-
-			// 	map.current.addLayer({
-			// 		id: "animatedPoint",
-			// 		type: "circle",
-			// 		source: "animatedPoint",
-			// 		paint: {
-			// 			"circle-radius": 10, // Larger circle size
-			// 			"circle-color": "blue", // Blue color
-			// 		},
-			// 	});
-
-			// 	// animateCircle();
-			// }
 		});
 
 		// If the map is already loaded, call the 'load' event handler manually
 		if (map.current.loaded()) {
 			map.current.fire("load");
 		}
-
-		console.log(data);
 	}, [data]);
 
 	return (
