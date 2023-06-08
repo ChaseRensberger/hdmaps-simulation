@@ -14,15 +14,10 @@ const getData = async (key: string) => {
 	return res.json();
 };
 
-const lerp = (start: any, end: any, t: any) => {
-	return start * (1 - t) + end * t;
-};
-
 const Simulation = () => {
-	const { data, error, isLoading } = useSWR(
-		"http://127.0.0.1:8000/crossings",
-		getData
-	);
+	const [fetchString, setFetchString] = useState("http://127.0.0.1:8000/lanes");
+
+	const { data, error, isLoading } = useSWR(fetchString, getData);
 
 	const mapContainer = useRef(null);
 	const map: any = useRef(null);
@@ -75,7 +70,7 @@ const Simulation = () => {
 			}
 
 			map.current.on("click", (e: any) => {
-				console.log(`Latitude: ${e.lngLat.lat}, Longitude: ${e.lngLat.lng}`);
+				console.log(e.lngLat.lat, e.lngLat.lng);
 			});
 
 			// Add a new source and layer for the points
