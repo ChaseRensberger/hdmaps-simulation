@@ -1,6 +1,6 @@
 "use client";
 import mapboxgl from "mapbox-gl";
-import "mapbox-gl/dist/mapbox-gl.css";
+// import "mapbox-gl/dist/mapbox-gl.css";
 import { useEffect, useRef, useState } from "react";
 import useSWR from "swr";
 
@@ -14,10 +14,36 @@ const getData = async (key: string) => {
 	return res.json();
 };
 
+const starting_position = [42.30021203192132, -83.69752499965037];
+const animationEnabled = false;
+
 const Simulation = () => {
 	const [fetchString, setFetchString] = useState("http://127.0.0.1:8000/lanes");
 
 	const { data, error, isLoading } = useSWR(fetchString, getData);
+
+	const [car, setCar] = useState({
+		lat: starting_position[0],
+		lng: starting_position[1],
+		steeringAngle: 0,
+		velocity: 0,
+	});
+
+	const width = 0.000008;
+
+	const setCarPosition = (lat: any, lng: any) => {
+		setCar((prevCar) => ({ ...prevCar, lat, lng }));
+	};
+
+	const animateCar = () => {
+		setCarPosition(car.lat + car.velocity, car.lng);
+
+		setTimeout(() => {
+			requestAnimationFrame(animateCar);
+		}, 1000);
+
+		requestAnimationFrame(animateCar);
+	};
 
 	const mapContainer = useRef(null);
 	const map: any = useRef(null);
@@ -52,6 +78,7 @@ const Simulation = () => {
 		map.current = new mapboxgl.Map({
 			container: mapContainer.current,
 			style: "mapbox://styles/mapbox/satellite-v9",
+			// center: [42.300720247580045, -83.69750032382792],
 			center: [lat, lng],
 			zoom: zoom,
 		});
@@ -71,6 +98,7 @@ const Simulation = () => {
 
 			map.current.on("click", (e: any) => {
 				console.log(e.lngLat.lat, e.lngLat.lng);
+				setCarPosition(e.lngLat.lat, e.lngLat.lng);
 			});
 
 			// Add a new source and layer for the points
@@ -90,6 +118,35 @@ const Simulation = () => {
 					"circle-radius": 3, // You can adjust the circle size here
 					"circle-color": "#FFFFFF",
 					// #B42222
+				},
+			});
+
+			map.current.addSource("square", {
+				type: "geojson",
+				data: {
+					type: "Feature",
+					geometry: {
+						type: "Polygon",
+						coordinates: [
+							[
+								[-83.69750032382792, 42.300720247580045],
+								[-83.69750032382792 + width, 42.300720247580045],
+								[-83.69750032382792 + width, 42.300720247580045 + width],
+								[-83.69750032382792, 42.300720247580045 + width],
+								[-83.69750032382792, 42.300720247580045],
+							],
+						],
+					},
+				},
+			});
+
+			map.current.addLayer({
+				id: "square",
+				type: "fill",
+				source: "square",
+				paint: {
+					"fill-color": "red",
+					"fill-opacity": 0.5,
 				},
 			});
 		});
