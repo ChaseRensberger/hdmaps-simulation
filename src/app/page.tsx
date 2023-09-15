@@ -14,22 +14,12 @@ const getData = async (key: string) => {
 	return res.json();
 };
 
-const starting_position = [42.30021203192132, -83.69752499965037];
-const animationEnabled = false;
-
 const Simulation = () => {
-	const [fetchString, setFetchString] = useState("http://127.0.0.1:8000/lanes");
+	const [fetchString, setFetchString] = useState(
+		"http://127.0.0.1:8000/lane-points"
+	);
 
 	const { data, error, isLoading } = useSWR(fetchString, getData);
-
-	const [car, setCar] = useState({
-		lat: starting_position[0],
-		lng: starting_position[1],
-		steeringAngle: 0,
-		velocity: 0,
-	});
-
-	const width = 0.00004;
 
 	const mapContainer = useRef(null);
 	const map: any = useRef(null);
@@ -39,23 +29,19 @@ const Simulation = () => {
 	const [zoom, setZoom] = useState(17);
 
 	const map_coordinates = data
-		? Object.entries(data)
-				// .filter(([key, value]: any) => {
-				// 	return value.point_id == 2;
-				// })
-				.map(([key, value]: any) => ({
-					type: "Feature",
-					geometry: {
-						type: "Point",
-						coordinates: [
-							parseFloat(value.latitude),
-							parseFloat(value.longitude),
-						],
-					},
-					properties: {
-						id: key,
-					},
-				}))
+		? Object.entries(data).map(([key, value]: any) => ({
+				type: "Feature",
+				geometry: {
+					type: "Point",
+					coordinates: [
+						parseFloat(value.latitude),
+						parseFloat(value.longitude),
+					],
+				},
+				properties: {
+					id: key,
+				},
+		  }))
 		: null;
 
 	useEffect(() => {
@@ -64,7 +50,6 @@ const Simulation = () => {
 		map.current = new mapboxgl.Map({
 			container: mapContainer.current,
 			style: "mapbox://styles/mapbox/satellite-v9",
-			// center: [42.300720247580045, -83.69750032382792],
 			center: [lat, lng],
 			zoom: zoom,
 		});
@@ -86,7 +71,6 @@ const Simulation = () => {
 				console.log(e.lngLat.lat, e.lngLat.lng);
 			});
 
-			// Add a new source and layer for the points
 			map.current.addSource("points", {
 				type: "geojson",
 				data: {
@@ -100,43 +84,12 @@ const Simulation = () => {
 				type: "circle",
 				source: "points",
 				paint: {
-					"circle-radius": 3, // You can adjust the circle size here
+					"circle-radius": 3,
 					"circle-color": "#FFFFFF",
-					// #B42222
-				},
-			});
-
-			map.current.addSource("square", {
-				type: "geojson",
-				data: {
-					type: "Feature",
-					geometry: {
-						type: "Polygon",
-						coordinates: [
-							[
-								[-83.69750032382792, 42.300720247580045],
-								[-83.69750032382792 + width, 42.300720247580045],
-								[-83.69750032382792 + width, 42.300720247580045 + width],
-								[-83.69750032382792, 42.300720247580045 + width],
-								[-83.69750032382792, 42.300720247580045],
-							],
-						],
-					},
-				},
-			});
-
-			map.current.addLayer({
-				id: "square",
-				type: "fill",
-				source: "square",
-				paint: {
-					"fill-color": "red",
-					"fill-opacity": 0.5,
 				},
 			});
 		});
 
-		// If the map is already loaded, call the 'load' event handler manually
 		if (map.current.loaded()) {
 			map.current.fire("load");
 		}
