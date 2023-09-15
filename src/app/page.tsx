@@ -9,24 +9,21 @@ mapboxgl.accessToken =
 		? process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN
 		: "UNDEFINED";
 
+const fetchString = "http://127.0.0.1:8000/lane-points";
+const lng = 42.300546;
+const lat = -83.698301;
+const zoom = 17;
+
 const getData = async (key: string) => {
 	const res = await fetch(key);
 	return res.json();
 };
 
 const Simulation = () => {
-	const [fetchString, setFetchString] = useState(
-		"http://127.0.0.1:8000/lane-points"
-	);
-
 	const { data, error, isLoading } = useSWR(fetchString, getData);
 
 	const mapContainer = useRef(null);
 	const map: any = useRef(null);
-
-	const [lng, setLng] = useState(42.300546);
-	const [lat, setLat] = useState(-83.698301);
-	const [zoom, setZoom] = useState(17);
 
 	const map_coordinates = data
 		? Object.entries(data).map(([key, value]: any) => ({
